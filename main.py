@@ -162,7 +162,7 @@ async def on_message( message: discord.Message):
         embed = discord.Embed(title="Message deleted", description=f"Your message was deleted because it was too toxic. The following reasons were found: **{'**, **'.join(reasons_to_delete)}**", color=discord.Color.red())
         await message.reply(f"{message.author.mention}", embed=embed, delete_after=15)
         await message.delete()
-        embed = discord.Embed(title="Message deleted", description=f"**{message.author}**'s message ***{content}*** was deleted because it was too toxic. The following reasons were found:", color=discord.Color.red())
+        embed = discord.Embed(title="Message deleted", description=f"**{message.author}**'s message ***[{content}]({message.jump_url})*** in <#{message.channel.id}> was deleted because it was too toxic. The following reasons were found:", color=discord.Color.red())
         for i in reasons_to_delete:
             toxicity_value = message_toxicity[tox.toxicity_names.index(i)]
             embed.add_field(name=i, value=f"Found toxicity value: **{toxicity_value*100}%**", inline=False)
