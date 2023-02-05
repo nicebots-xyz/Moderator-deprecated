@@ -33,7 +33,6 @@ Note: If you're not comfortable with any of the above steps, we recommend using 
 
 The Moderator Bot has the following command:
 
-
 ### /setthreshold 
 
 This command allows you to set the threshold for each type of toxicity. The options for toxicity are:
@@ -71,8 +70,11 @@ Get some help & explanations.
 A debug / testing command. Used to get the values detected by the bot for a given message and see if it would have been deleted, usually used to tweak the settings with `/setthreshold`.
 ## Built With
 - [Discord](https://discord.com) - Communication platform for communities
-
+- [Python](https://www.python.org) - Programming language
+- [py-cord](https://pycord.dev)
 - [Google Perspective API](https://perspectiveapi.com) - API for monitoring online conversations for toxic behavior
+- [SQLite3](https://github.com/python/cpython/tree/3.11/Lib/sqlite3/) - SQL database engine wrapper for Python
+- [Docker](https://www.docker.com) - Containerization platform
 
 ## Authors
 - Paillat-Dev - Initial work
