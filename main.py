@@ -81,7 +81,11 @@ async def help(ctx: discord.ApplicationContext):
     embed = discord.Embed(title="Help", description="Here is a list of all the toxicity types and their definitions. You can set the toxicity thresholds with the `/moderation` command", color=discord.Color.og_blurple())
     for definition in toxicity_definitions:
         embed.add_field(name=tox.toxicity_names[toxicity_definitions.index(definition)], value=definition, inline=False)
-    await ctx.respond(embed=embed, ephemeral=True)
+    commands_embed = discord.Embed(title="Commands", description="Here is a list of all the commands", color=discord.Color.og_blurple())
+    for command in bot.commands:
+        commands_embed.add_field(name=command.name, value=command.description, inline=False)
+    embeds = [embed, commands_embed]
+    await ctx.respond(embeds=embeds, ephemeral=True)
 
 @bot.command(name="get_toxicity", description="Get the toxicity of a message")
 @discord.option(name="message", description="The message you want to check", required=True)
@@ -114,12 +118,18 @@ async def setup(ctx: discord.ApplicationContext, log_channel: discord.TextChanne
     try: 
         data = c.execute("SELECT * FROM data WHERE guild_id = ?", (str(ctx.guild.id),))
         data = c.fetchone()
+        try : data2 = c.execute("SELECT * FROM moderation WHERE guild_id = ?", (str(ctx.guild.id),))
+        except: data2 = None
     except: data = None
     if data is not None:
         c.execute("UPDATE data SET logs_channel_id = ?, is_enabled = ?, moderator_role_id = ? WHERE guild_id = ?", (str(log_channel.id), enable, str(mod_role.id), str(ctx.guild.id)))
     else:
         c.execute("INSERT INTO data VALUES (?, ?, ?, ?)", (str(ctx.guild.id), str(log_channel.id), enable, str(mod_role.id)))
     conn.commit()
+    data = c.execute("SELECT * FROM moderation WHERE guild_id = ?", (str(ctx.guild.id),))
+    data = c.fetchone()
+    channel = bot.get_channel(1071853671320658090)
+    await channel.follow(destination=log_channel, reason="Moderator bot logs and updates channel")
     await ctx.respond("The moderation has been successfully setup", ephemeral=True)
 
 @bot.command(name="get_settings", description="Get the moderation settings")
@@ -150,11 +160,14 @@ async def on_message( message: discord.Message):
     channel = message.guild.get_channel(int(data2[1]))
     is_enabled = data2[2]
     moderator_role_id = data2[3]
-    #we also do that with the manage_messages permission, so the moderators can't be moderated
-    if message.author.guild_permissions.manage_messages: return #if the user is a moderator, we don't want to moderate him because he is allowed to say whatever he wants because he is just like a dictator
-    if message.author.guild_permissions.administrator: return #if the user is an administrator, we don't want to moderate him because he is allowed to say whatever he wants because he is a DICTATOR
-    if not is_enabled: return
     content = message.content
+    #we also do that with the manage_messages permission, so the moderators can't be moderated
+    if not content.startswith("MOD TEST"):
+        if message.author.guild_permissions.manage_messages: return #if the user is a moderator, we don't want to moderate him because he is allowed to say whatever he wants because he is just like a dictator
+        if message.author.guild_permissions.administrator: return #if the user is an administrator, we don't want to moderate him because he is allowed to say whatever he wants because he is a DICTATOR
+    else:
+        content = content.replace("MOD TEST", "")
+    if not is_enabled: return
     message_toxicity = tox.get_toxicity(content)
     reasons_to_delete = []
     reasons_to_suspicous = []
@@ -163,7 +176,7 @@ async def on_message( message: discord.Message):
              print(value)
              reasons_to_delete.append(tox.toxicity_names[message_toxicity.index(value)])
     for i in message_toxicity:
-        if float(data[message_toxicity.index(i)+1]-0.1) <= i < float(data[message_toxicity.index(i)+4]): reasons_to_suspicous.append(tox.toxicity_names[message_toxicity.index(i)])
+        if float(data[message_toxicity.index(i)+1]-0.1) <= i < float(data[message_toxicity.index(i)+1]): reasons_to_suspicous.append(tox.toxicity_names[message_toxicity.index(i)])
     if reasons_to_delete != []:
         embed = discord.Embed(title="Message deleted", description=f"Your message was deleted because it was too toxic. The following reasons were found: **{'**, **'.join(reasons_to_delete)}**", color=discord.Color.red())
         await message.reply(f"{message.author.mention}", embed=embed, delete_after=15)
@@ -185,4 +198,29 @@ async def on_message( message: discord.Message):
     else:
         return
 
+@bot.event
+async def on_application_command_error(ctx: discord.ApplicationContext, error: Exception):
+    if str(error) == "Application Command raised an exception: Forbidden: 403 Forbidden (error code: 50013): Missing Permissions":
+        await ctx.respond("I don't have the permissions to do that", ephemeral=True)
+    else:   
+        await ctx.respond("An unknown error occured; please try again later. If the error persists, you can contact us in our support server: https://discord.gg/pB6hXtUeDv . Please send the following LOGS to the support server: ```py\n"+str(error)+"```", ephemeral=True)
+        print(error)
+
+@bot.event
+#when the bot is added to a new server, we want to send a message to the user who added the bot to the server
+async def on_guild_join(guild: discord.Guild):
+    print("Bot added to a new server: "+str(guild))
+    #we get the audit log entry of the bot being added to the server
+    audit_log_entry = await guild.audit_logs(limit=1, action=discord.AuditLogAction.bot_add).flatten()
+    #we get the user who added the bot to the server
+    user = audit_log_entry[0].user
+    print(user)
+    #we send a message to the user who added the bot to the server
+    await user.send(f"Thank you for adding me to your server! You can use the `/setup` command to setup the , and the `/setthreshold` command to set the toxicity threshold. You'll need to run that command at least once to setup the bot. You can use the `/help` command to get a list of all commands and their usage. If you need help, you can join our support server: https://discord.gg/pB6hXtUeDv")
+@bot.event
+async def on_ready():
+    print("Bot is ready!")
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="Watch out for toxic people!"))
+#Bot description
+# A bot that moderates toxic messages in your server thanks to AI. You can use the `/setup` command to setup the bot, and the `/setthreshold` command to set the toxicity threshold. You'll need to run that command at least once to setup the bot. You can use the `/help` command to get a list of all commands and their usage. If you need help, you can join our support server: https://discord.gg/pB6hXtUeDv or check our github page: https://github.com/Paillat-Dev/Moderator
 bot.run(discord_token)
