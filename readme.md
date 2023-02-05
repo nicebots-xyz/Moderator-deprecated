@@ -30,11 +30,11 @@ pip install -r requirements.txt.
 Note: If you're not comfortable with any of the above steps, we recommend using option 1.
 
 ## Commands and Usage
+
 The Moderator Bot has the following command:
 
-```bash
-/setthreshold 
-```
+
+### /setthreshold 
 
 This command allows you to set the threshold for each type of toxicity. The options for toxicity are:
 
@@ -49,13 +49,29 @@ This command allows you to set the threshold for each type of toxicity. The opti
 - obscene
 - spam
 
-To use the `/setthreshold` command, you must have administrator permissions. If a value is not specified, the default threshold will be set to 0.40. You can view the current settings for your server by using the `/setthreshold` command without any options.
+To use the `/setthreshold` command, you must have administrator permissions. If a value is not specified, the default threshold will be set to 0.40. You can view the current settings for your server by using the `/setthreshold` command without any options. **You will need to run this command at least once when adding the bot to your server for the firs time**.
 
-The other commands are:
-- 
+### /setup
 
+Command used to setup/change misc parameters, like:
+- `logs_channel` : The channel where you want the logs & updates being sent, usually a channel accessible only to moderators, please be shure of checking that moderator has acces to the channel.
+- `enable` : TRUE / FALSE , self explanatory
+- mod_role : the role of the moderators. Used to ping the moderators when the bot is unsure of the toxicity of a message
+
+### /get_settings
+
+Get the current settings.
+
+### /help
+
+Get some help & explanations.
+
+### /get_toxicity
+
+A debug / testing command. Used to get the values detected by the bot for a given message and see if it would have been deleted, usually used to tweak the settings with `/setthreshold`.
 ## Built With
 - [Discord](https://discord.com) - Communication platform for communities
+
 - [Google Perspective API](https://perspectiveapi.com) - API for monitoring online conversations for toxic behavior
 
 ## Authors
