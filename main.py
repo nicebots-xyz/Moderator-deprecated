@@ -111,8 +111,14 @@ async def get_toxicity(ctx: discord.ApplicationContext, message: str):
 @discord.option(name="enable", description="Enable the moderation", required=True)
 @discord.option(name="mod_role", description="The role of the moderators", required=True)
 async def setup(ctx: discord.ApplicationContext, log_channel: discord.TextChannel, enable: bool, mod_role: discord.Role):
-    try: c.execute("UPDATE data SET logs_channel_id = ?, is_enabled = ?, moderator_role_id = ? WHERE guild_id = ?", (str(log_channel.id), enable, str(mod_role.id), str(ctx.guild.id)))
-    except: c.execute("INSERT INTO data VALUES (?, ?, ?, ?)", (str(ctx.guild.id), str(log_channel.id), enable, str(mod_role.id)))
+    try: 
+        data = c.execute("SELECT * FROM data WHERE guild_id = ?", (str(ctx.guild.id),))
+        data = c.fetchone()
+    except: data = None
+    if data is not None:
+        c.execute("UPDATE data SET logs_channel_id = ?, is_enabled = ?, moderator_role_id = ? WHERE guild_id = ?", (str(log_channel.id), enable, str(mod_role.id), str(ctx.guild.id)))
+    else:
+        c.execute("INSERT INTO data VALUES (?, ?, ?, ?)", (str(ctx.guild.id), str(log_channel.id), enable, str(mod_role.id)))
     conn.commit()
     await ctx.respond("The moderation has been successfully setup", ephemeral=True)
 
