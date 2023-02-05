@@ -218,12 +218,10 @@ async def on_application_command_error(ctx: discord.ApplicationContext, error: E
 @bot.event
 #when the bot is added to a new server, we want to send a message to the user who added the bot to the server
 async def on_guild_join(guild: discord.Guild):
-    print("Bot added to a new server: "+str(guild))
     #we get the audit log entry of the bot being added to the server
     audit_log_entry = await guild.audit_logs(limit=1, action=discord.AuditLogAction.bot_add).flatten()
     #we get the user who added the bot to the server
     user = audit_log_entry[0].user
-    print(user)
     #we send a message to the user who added the bot to the server
     await user.send(f"Thank you for adding me to your server! You can use the `/setup` command to setup the , and the `/setthreshold` command to set the toxicity threshold. You'll need to run that command at least once to setup the bot. You can use the `/help` command to get a list of all commands and their usage. If you need help, you can join our support server: https://discord.gg/pB6hXtUeDv")
 @bot.event
