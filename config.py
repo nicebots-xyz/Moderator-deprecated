@@ -34,6 +34,6 @@ c = conn.cursor() # Create a cursor
 #now we create a database with guild_id and all the values from toxicity nams as floats
 c.execute('''CREATE TABLE IF NOT EXISTS moderation (guild_id TEXT, toxicity FLOAT, severe_toxicity FLOAT, identity_attack FLOAT, insult FLOAT, profanity FLOAT, threat FLOAT, sexually_explicit FLOAT, flirtation FLOAT, obscene FLOAT, spam FLOAT)''')
 #now we reate a table DATA with guild_id, logs_channel_id, is_enabled, moderator_role_id
-c.execute('''CREATE TABLE IF NOT EXISTS DATA (guild_id INTEGER PRIMARY KEY, logs_channel_id INTEGER, is_enabled BOOLEAN, moderator_role_id INTEGER)''')
+c.execute('''CREATE TABLE IF NOT EXISTS DATA (guild_id INTEGER , logs_channel_id INTEGER, is_enabled BOOLEAN, moderator_role_id INTEGER)''')
 discord_token = os.getenv('DISCORD_TOKEN') # Get the discord token from the .env file
 perspective_api_key = os.getenv('PERSPECTIVE_API_KEY') # Get the perspective api key from the .env file
