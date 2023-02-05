@@ -36,6 +36,7 @@ def get_toxicity(message: str):
     message = re.sub(r'\~\~([^~]+)\~\~', r'\1', message)
     message = re.sub(r'\`([^`]+)\`', r'\1', message)
     message = re.sub(r'\`\`\`([^`]+)\`\`\`', r'\1', message) 
+    message = re.sub(r'\:([^:]+)\:', r'\1', message)
     
     #we try doing the request in english, but if we get 'errorType': 'LANGUAGE_NOT_SUPPORTED_BY_ATTRIBUTE' we try again with the analyze_request_not_en
     try:
