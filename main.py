@@ -1,6 +1,7 @@
 import discord
 from discord import default_permissions
 import toxicity as tox
+import re
 from config import discord_token, conn, c, toxicity_definitions, toxicity_names
 intents = discord.Intents.default()
 intents.message_content = True
@@ -161,11 +162,19 @@ async def on_message( message: discord.Message):
     is_enabled = data2[2]
     moderator_role_id = data2[3]
     content = message.content
+    #if the content starts with everything excpet something containing a space and then ! , we don't want to moderate it because it is a command
+    #first we check if the content starts with everything and then !
+    #with regex, we check if the content starts with anything and then !
+    if re.match(r".*!", content):
+        #if the match dosent contain a space, we don't want to moderate it because it is a command
+        if not " " in re.match(r".*!", content).group(0):
+            return
     #we also do that with the manage_messages permission, so the moderators can't be moderated
     if not content.startswith("MOD TEST"):
         if message.author.guild_permissions.manage_messages: return #if the user is a moderator, we don't want to moderate him because he is allowed to say whatever he wants because he is just like a dictator
         if message.author.guild_permissions.administrator: return #if the user is an administrator, we don't want to moderate him because he is allowed to say whatever he wants because he is a DICTATOR
     else:
+        content = content.replace("MOD TEST ", "")
         content = content.replace("MOD TEST", "")
     if not is_enabled: return
     message_toxicity = tox.get_toxicity(content)
