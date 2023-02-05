@@ -181,14 +181,14 @@ async def on_message( message: discord.Message):
         embed = discord.Embed(title="Message deleted", description=f"Your message was deleted because it was too toxic. The following reasons were found: **{'**, **'.join(reasons_to_delete)}**", color=discord.Color.red())
         await message.reply(f"{message.author.mention}", embed=embed, delete_after=15)
         await message.delete()
-        embed = discord.Embed(title="Message deleted", description=f"**{message.author}**'s message ***[{content}]({message.jump_url})*** in <#{message.channel.id}> was deleted because it was too toxic. The following reasons were found:", color=discord.Color.red())
+        embed = discord.Embed(title="Message deleted", description=f"**{message.author.mention}**'s message ***[{content}]({message.jump_url})*** in <#{message.channel.id}> was deleted because it was too toxic. The following reasons were found:", color=discord.Color.red())
         for i in reasons_to_delete:
             toxicity_value = message_toxicity[tox.toxicity_names.index(i)]
             embed.add_field(name=i, value=f"Found toxicity value: **{toxicity_value*100}%**", inline=False)
         await channel.send(embed=embed)
     elif len(reasons_to_suspicous) > 0:
         await message.reply(f"<@&{moderator_role_id}> This message might be toxic. The following reasons were found: **{'**, **'.join(reasons_to_suspicous)}**", delete_after=15, mention_author=False)
-        embed = discord.Embed(title="Message suspicious", description=f"**{message.author}**'s message [***{content}***]({message.jump_url}) might be toxic. The following reasons were found:", color=discord.Color.orange())
+        embed = discord.Embed(title="Message suspicious", description=f"**{message.author.mention}**'s message [***{content}***]({message.jump_url}) might be toxic. The following reasons were found:", color=discord.Color.orange())
         for i in reasons_to_suspicous:
             toxicity_value = message_toxicity[tox.toxicity_names.index(i)]
             embed.add_field(name=i, value=f"Found toxicity value: **{toxicity_value*100}%**", inline=False)
@@ -220,7 +220,7 @@ async def on_guild_join(guild: discord.Guild):
 @bot.event
 async def on_ready():
     print("Bot is ready!")
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="Watch out for toxic people!"))
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="out for toxic people!"))
 #Bot description
 # A bot that moderates toxic messages in your server thanks to AI. You can use the `/setup` command to setup the bot, and the `/setthreshold` command to set the toxicity threshold. You'll need to run that command at least once to setup the bot. You can use the `/help` command to get a list of all commands and their usage. If you need help, you can join our support server: https://discord.gg/pB6hXtUeDv or check our github page: https://github.com/Paillat-Dev/Moderator
 bot.run(discord_token)
