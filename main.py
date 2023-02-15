@@ -1,5 +1,6 @@
 import discord
-from discord import default_permissions
+from discord import default_permissions, webhook
+
 import toxicity as tox
 import re
 from config import discord_token, conn, c, toxicity_definitions, toxicity_names
@@ -116,21 +117,26 @@ async def get_toxicity(ctx: discord.ApplicationContext, message: str):
 @discord.option(name="enable", description="Enable the moderation", required=True)
 @discord.option(name="mod_role", description="The role of the moderators", required=True)
 async def setup(ctx: discord.ApplicationContext, log_channel: discord.TextChannel, enable: bool, mod_role: discord.Role):
+    old_log_channel = None
     try: 
         data = c.execute("SELECT * FROM data WHERE guild_id = ?", (str(ctx.guild.id),))
         data = c.fetchone()
-        try : data2 = c.execute("SELECT * FROM moderation WHERE guild_id = ?", (str(ctx.guild.id),))
-        except: data2 = None
+        old_log_channel = bot.get_channel(int(data[1]))
     except: data = None
     if data is not None:
         c.execute("UPDATE data SET logs_channel_id = ?, is_enabled = ?, moderator_role_id = ? WHERE guild_id = ?", (str(log_channel.id), enable, str(mod_role.id), str(ctx.guild.id)))
     else:
         c.execute("INSERT INTO data VALUES (?, ?, ?, ?)", (str(ctx.guild.id), str(log_channel.id), enable, str(mod_role.id)))
+    announcements_channel = bot.get_channel(1072194862012706887)
+
+    if old_log_channel is None or old_log_channel != log_channel:
+        await announcements_channel.follow(destination=log_channel, reason="Moderator bot logs and updates channel")
+        if old_log_channel is not None and old_log_channel != log_channel:
+            pass 
+        #HERE I WANT TO UNFOLLOW THE OLD LOG CHANNEL
     conn.commit()
     data = c.execute("SELECT * FROM moderation WHERE guild_id = ?", (str(ctx.guild.id),))
     data = c.fetchone()
-    channel = bot.get_channel(1071853671320658090)
-    await channel.follow(destination=log_channel, reason="Moderator bot logs and updates channel")
     await ctx.respond("The moderation has been successfully setup", ephemeral=True)
 
 @bot.command(name="get_settings", description="Get the moderation settings")
