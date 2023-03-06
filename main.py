@@ -168,10 +168,6 @@ async def on_message( message: discord.Message):
     is_enabled = data2[2]
     moderator_role_id = data2[3]
     content = message.content
-    #if the content starts with everything excpet something containing a space and then ! , we don't want to moderate it because it is a command
-    #first we check if the content starts with everything and then !
-    #with regex, we check if the content starts with anything and then !
-    #we also do that with the manage_messages permission, so the moderators can't be moderated
     if not content.startswith("MOD TEST"):
         if message.author.guild_permissions.manage_messages: return #if the user is a moderator, we don't want to moderate him because he is allowed to say whatever he wants because he is just like a dictator
         if message.author.guild_permissions.administrator: return #if the user is an administrator, we don't want to moderate him because he is allowed to say whatever he wants because he is a DICTATOR
@@ -179,7 +175,6 @@ async def on_message( message: discord.Message):
         content = content.replace("MOD TEST ", "")
         content = content.replace("MOD TEST", "")
     if re.match(r".*!", content):
-    #if the match dosent contain a space, we don't want to moderate it because it is a command
         if not " " in re.match(r".*!", content).group(0):
             return
     if not is_enabled: return
@@ -208,7 +203,6 @@ async def on_message( message: discord.Message):
             toxicity_value = message_toxicity[tox.toxicity_names.index(i)]
             embed.add_field(name=i, value=f"Found toxicity value: **{toxicity_value*100}%**", inline=False)
         await channel.send(embed=embed)
-        #we add a reaction to the message so the moderators can easily find it orange circle emoji
         await message.add_reaction("🟠")
     else:
         return
