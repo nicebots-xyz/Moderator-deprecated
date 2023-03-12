@@ -2,6 +2,7 @@ import sqlite3
 import os
 import logging
 from dotenv import load_dotenv
+import discord
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 toxicity_names = [
@@ -37,3 +38,7 @@ c.execute('''CREATE TABLE IF NOT EXISTS moderation (guild_id TEXT, toxicity FLOA
 c.execute('''CREATE TABLE IF NOT EXISTS DATA (guild_id INTEGER , logs_channel_id INTEGER, is_enabled BOOLEAN, moderator_role_id INTEGER)''')
 discord_token = os.getenv('DISCORD_TOKEN') # Get the discord token from the .env file
 perspective_api_key = os.getenv('PERSPECTIVE_API_KEY') # Get the perspective api key from the .env file
+
+intents = discord.Intents.default()
+intents.message_content = True
+bot = discord.Bot(intents=intents)

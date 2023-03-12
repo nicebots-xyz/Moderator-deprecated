@@ -1,14 +1,14 @@
 import discord
 from discord import default_permissions, webhook
 import toxicity as tox
+import utils
 import re
-from config import discord_token, conn, c, toxicity_definitions, toxicity_names
+from config import discord_token, conn, c, toxicity_definitions, toxicity_names, bot
+
 from discord.ext.pages import Paginator, Page
 import json
 import os
-intents = discord.Intents.default()
-intents.message_content = True
-bot = discord.Bot(intents=intents)
+import check
 
 @bot.command(name="setthreshold", description="Set the threshold for a toxicity")
 @discord.option(name="toxicity", description="The toxicity threshold", required=False)
@@ -163,64 +163,21 @@ async def complete_add_del(ctx: discord.AutocompleteContext):
 
 word = bot.create_group("word", "Commands for handling the blacklist and whitelist.")
 
-async def process_bw(action, exp, guild_id, context):
-    #check if the data folder exists
-    if not os.path.exists("./data"): os.mkdir("./data")
-    if not os.path.exists("./data/words"): os.mkdir("./data/words")
-    #check if the file exists
-    if not os.path.exists(f"./data/words/{guild_id}.json"):
-        with open(f"./data/words/{guild_id}.json", "w") as f:
-            json.dump({"whitelist": [], "blacklist": []}, f)
-            f.close()
-    with open(f"./data/words/{guild_id}.json", "r") as f:
-        try:
-            data = json.load(f)
-            try: whitelist = data["whitelist"]
-            except: whitelist = []
-            try: blacklist = data["blacklist"]
-            except: blacklist = []
-        except:
-            whitelist = []
-            blacklist = []
-        f.close()
-    if action == "add":
-        if exp in whitelist  and context == "whitelist": return "The word is already in the whitelist"
-        if exp in blacklist and context == "blacklist": return "The word is already in the blacklist"
-        if exp in whitelist and context == "blacklist": return "The word is in the whitelist, you can't add it to the blacklist"
-        if exp in blacklist and context == "whitelist": return "The word is in the blacklist, you can't add it to the whitelist"
-        if context == "whitelist" and exp not in whitelist and exp not in blacklist: whitelist.append(exp)
-        if context == "blacklist" and exp not in whitelist and exp not in blacklist: blacklist.append(exp)
-        with open(f"./data/words/{guild_id}.json", "w") as f:
-            json.dump({"whitelist": whitelist, "blacklist": blacklist}, f)
-            f.close()
-        return f"The word has been successfully added to the {context}"
-    if action == "delete":
-        if exp not in whitelist and context == "whitelist":
-            if exp in blacklist: return "The word is in the blacklist, you can't delete it from the whitelist"
-            return "The word is not in the whitelist, you can't delete it"
-        if exp not in whitelist and context == "blacklist":
-            if exp in blacklist: return "The word is in the blacklist, you can't delete it from the whitelist"
-            return "The word is not in the whitelist, you can't delete it"
-        if exp in whitelist and exp not in blacklist and context == "whitelist": whitelist.remove(exp)
-        if exp in blacklist and exp not in whitelist and context == "blacklist": blacklist.remove(exp)
-        with open(f"./data/words/{guild_id}.json", "w") as f:
-            json.dump({"whitelist": whitelist, "blacklist": blacklist}, f)
-            f.close()
-        return f"The word has been successfully deleted from the {context}"
+
 
 @word.command(name="whitelist", description="Add or delete a word from the whitelist")
 @discord.option(name="add_or_delete", description="Add or delete a word from the whitelist", autocomplete=complete_add_del)
 @discord.option(name="word", description="The word you want to add or delete from the whitelist")
 @default_permissions(administrator=True)
 async def whitelst(ctx: discord.ApplicationContext, add_or_delete: str, exp: str):
-    await ctx.respond(await process_bw(add_or_delete, exp, ctx.guild_id, "whitelist"), ephemeral=True)
+    await ctx.respond(await utils.process_bw(add_or_delete, exp, ctx.guild_id, "whitelist"), ephemeral=True)
 
 @word.command(name="blacklist", description="Add or delete a word from the blacklist")
 @discord.option(name="add_or_delete", description="Add or delete a word from the blacklist", autocomplete=complete_add_del)
 @discord.option(name="word", description="The word you want to add or delete from the blacklist")
 @default_permissions(administrator=True)
 async def blacklst(ctx: discord.ApplicationContext, add_or_delete: str, exp: str):
-    await ctx.respond(await process_bw(add_or_delete, exp, ctx.guild_id, "blacklist"), ephemeral=True)
+    await ctx.respond(await utils.process_bw(add_or_delete, exp, ctx.guild_id, "blacklist"), ephemeral=True)
 
 w_b = ["whitelist", "blacklist"]
 async def complete_w_b(ctx: discord.AutocompleteContext):
@@ -288,89 +245,14 @@ async def list_words(ctx: discord.ApplicationContext, whitelist_or_blacklist: st
             number += 1
         paginator = Paginator(pages=my_pages)
         await paginator.respond(interaction=interaction, ephemeral=True)
+
+
+
 ####################### EVENTS #######################
 @bot.event
 async def on_message( message: discord.Message):
     if message.author == bot.user: return #if the message is sent by the bot, we don't want to moderate it, we don't want to moderate the bot,
-    try: 
-        c.execute("SELECT * FROM moderation WHERE guild_id = ?", (str(message.guild.id),))
-        data = c.fetchone()
-    except: return
-    try: 
-        c.execute("SELECT * FROM data WHERE guild_id = ?", (str(message.guild.id),))
-        data2 = c.fetchone()
-    except: return
-    if data is None: return
-    channel = message.guild.get_channel(int(data2[1]))
-    is_enabled = data2[2]
-    moderator_role_id = data2[3]
-    content = message.content
-    if not content.startswith("MOD TEST"):
-        if message.author.guild_permissions.manage_messages: return #if the user is a moderator, we don't want to moderate him because he is allowed to say whatever he wants because he is just like a dictator
-        if message.author.guild_permissions.administrator: return #if the user is an administrator, we don't want to moderate him because he is allowed to say whatever he wants because he is a DICTATOR
-    else:
-        content = content.replace("MOD TEST ", "")
-        content = content.replace("MOD TEST", "")
-    if re.match(r".*!", content):
-        if not " " in re.match(r".*!", content).group(0):
-            return
-    if not is_enabled: return
-    #now we get the json file with the whit
-    with open(f"./data/words/{message.guild.id}.json", "r") as f:
-        try:
-            data3 = json.load(f)
-            try: whitelist = data3["whitelist"]
-            except: whitelist = []
-            try: blacklist = data3["blacklist"]
-            except: blacklist = []
-        except:
-            whitelist = []
-            blacklist = []
-    #we try to find the words in the whitelist in the message, if we find one, we don't want to moderate it
-    for word in whitelist:
-        #we check that with .lower and .find because we don't want to moderate the message if the word is in the whitelist
-        if content.lower().find(word.lower()) != -1: 
-            return
-    #we try to find the words in the blacklist in the message, if we find one, we want to moderate it
-    for word in blacklist:
-        #we check that with .lower and .find because we don't want to moderate the message if the word is in the blacklist
-        if content.lower().find(word.lower()) != -1:
-            message_toxicity.append(1)
-            embed = discord.Embed(title="Message deleted", description=f"Your message was deleted because it was too toxic. The following reasons were found: **Blacklisted word**", color=discord.Color.red())
-            await message.reply(f"{message.author.mention}", embed=embed, delete_after=15)
-            await message.delete()
-            embed = discord.Embed(title="Message deleted", description=f"**{message.author.mention}**'s message ***[{content}]({message.jump_url})*** in <#{message.channel.id}> was deleted because it was too toxic. The following reasons were found:", color=discord.Color.red())
-            embed.add_field(name="Blacklisted word", value=f"The word **||{word}||** is blacklisted", inline=False)
-            await channel.send(embed=embed)
-            return
-    message_toxicity = tox.get_toxicity(content)
-    reasons_to_suspicous = []
-    reasons_to_delete = []
-
-    for value in message_toxicity:
-        if value >= float(data[message_toxicity.index(value)+1]):
-            reasons_to_delete.append(tox.toxicity_names[message_toxicity.index(value)])
-    for i in message_toxicity:
-        if float(data[message_toxicity.index(i)+1]-0.1) <= i < float(data[message_toxicity.index(i)+1]): reasons_to_suspicous.append(tox.toxicity_names[message_toxicity.index(i)])
-    if reasons_to_delete != []:
-        embed = discord.Embed(title="Message deleted", description=f"Your message was deleted because it was too toxic. The following reasons were found: **{'**, **'.join(reasons_to_delete)}**", color=discord.Color.red())
-        await message.reply(f"{message.author.mention}", embed=embed, delete_after=15)
-        await message.delete()
-        embed = discord.Embed(title="Message deleted", description=f"**{message.author.mention}**'s message ***[{content}]({message.jump_url})*** in <#{message.channel.id}> was deleted because it was too toxic. The following reasons were found:", color=discord.Color.red())
-        for i in reasons_to_delete:
-            toxicity_value = message_toxicity[tox.toxicity_names.index(i)]
-            embed.add_field(name=i, value=f"Found toxicity value: **{toxicity_value*100}%**", inline=False)
-        await channel.send(embed=embed)
-    elif len(reasons_to_suspicous) > 0:
-        await message.reply(f"<@&{moderator_role_id}> This message might be toxic. The following reasons were found: **{'**, **'.join(reasons_to_suspicous)}**", delete_after=15, mention_author=False)
-        embed = discord.Embed(title="Message suspicious", description=f"**{message.author.mention}**'s message [***{content}***]({message.jump_url}) might be toxic. The following reasons were found:", color=discord.Color.orange())
-        for i in reasons_to_suspicous:
-            toxicity_value = message_toxicity[tox.toxicity_names.index(i)]
-            embed.add_field(name=i, value=f"Found toxicity value: **{toxicity_value*100}%**", inline=False)
-        await channel.send(embed=embed)
-        await message.add_reaction("🟠")
-    else:
-        return
+    await check.validate(message)
 
 @bot.event
 #when the bot is added to a new server, we want to send a message to the user who added the bot to the server
@@ -386,8 +268,6 @@ async def on_guild_join(guild: discord.Guild):
 async def on_ready():
     print("Bot is ready!")
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="out for toxic people!"))
-#Bot description
-# A bot that moderates toxic messages in your server thanks to AI. You can use the `/setup` command to setup the bot, and the `/setthreshold` command to set the toxicity threshold. You'll need to run that command at least once to setup the bot. You can use the `/help` command to get a list of all commands and their usage. If you need help, you can join our support server: https://discord.gg/pB6hXtUeDv or check our github page: https://github.com/Paillat-Dev/Moderator
 @bot.event
 async def on_application_command_error(ctx: discord.ApplicationContext, error: Exception):
     if str(error) == "Application Command raised an exception: Forbidden: 403 Forbidden (error code: 50013): Missing Permissions":
@@ -395,6 +275,8 @@ async def on_application_command_error(ctx: discord.ApplicationContext, error: E
     else:   
         await ctx.respond("An unknown error occured; please try again later. If the error persists, you can contact us in our support server: https://discord.gg/pB6hXtUeDv . Please send the following LOGS to the support server: ```py\n"+str(error)+"```", ephemeral=True)
         raise error #raise the error so that it can be seen in the console
+
+
 ###############################################EXECUTION###############################################
 
 bot.run(discord_token)
