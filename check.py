@@ -24,9 +24,6 @@ async def validate(message):
     else:
         content = content.replace("MOD TEST ", "")
         content = content.replace("MOD TEST", "")
-    if re.match(r".*!", content):
-        if not " " in re.match(r".*!", content).group(0):
-            return
     if not is_enabled: return
     #now we get the json file with the whit
     with open(f"./data/words/{message.guild.id}.json", "r") as f:

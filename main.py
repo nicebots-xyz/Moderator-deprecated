@@ -163,8 +163,6 @@ async def complete_add_del(ctx: discord.AutocompleteContext):
 
 word = bot.create_group("word", "Commands for handling the blacklist and whitelist.")
 
-
-
 @word.command(name="whitelist", description="Add or delete a word from the whitelist")
 @discord.option(name="add_or_delete", description="Add or delete a word from the whitelist", autocomplete=complete_add_del)
 @discord.option(name="word", description="The word you want to add or delete from the whitelist")
