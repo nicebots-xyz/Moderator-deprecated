@@ -57,6 +57,7 @@ async def validate(message):
     if reasons_to_delete != []:
         await message.delete()
         embed = discord.Embed(title="Message deleted", description=f"Your message was deleted because it was too toxic. The following reasons were found: **{'**, **'.join(reasons_to_delete)}**", color=discord.Color.red())
+        await message.channel.send(f"{message.author.mention}", embed=embed, delete_after=15)
         return await utils.log(title="Message deleted", description=f"**{message.author.mention}**'s message ***[{content}]({message.jump_url})*** in <#{message.channel.id}> was deleted because it was too toxic. The following reasons were found:", color=discord.Color.red(), channel=channel, reasons_list=reasons_to_delete, toxicity_list=message_toxicity)
     elif len(reasons_to_suspicous) > 0:
         await message.reply(f"<@&{moderator_role_id}> This message might be toxic. The following reasons were found: **{'**, **'.join(reasons_to_suspicous)}**", delete_after=15, mention_author=False)
