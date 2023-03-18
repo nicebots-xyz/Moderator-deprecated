@@ -19,8 +19,10 @@ async def validate(message):
     moderator_role_id = data2[3]
     content = message.content
     if not content.startswith("MOD TEST"):
-        if message.author.guild_permissions.manage_messages: return #if the user is a moderator, we don't want to moderate him because he is allowed to say whatever he wants because he is just like a dictator
-        if message.author.guild_permissions.administrator: return #if the user is an administrator, we don't want to moderate him because he is allowed to say whatever he wants because he is a DICTATOR
+        try:
+            if message.author.guild_permissions.manage_messages: return #if the user is a moderator, we don't want to moderate him because he is allowed to say whatever he wants because he is just like a dictator
+            if message.author.guild_permissions.administrator: return #if the user is an administrator, we don't want to moderate him because he is allowed to say whatever he wants because he is a DICTATOR
+        except: pass
     else:
         content = content.replace("MOD TEST ", "")
         content = content.replace("MOD TEST", "")
