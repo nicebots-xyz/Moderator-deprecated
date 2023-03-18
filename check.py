@@ -28,26 +28,28 @@ async def validate(message):
         content = content.replace("MOD TEST", "")
     if not is_enabled: return
     #now we get the json file with the whit
-    with open(f"./data/words/{message.guild.id}.json", "r") as f:
-        try:
-            data3 = json.load(f)
-            try: whitelist = data3["whitelist"]
-            except: whitelist = []
-            try: blacklist = data3["blacklist"]
-            except: blacklist = []
-        except:
-            whitelist = []
-            blacklist = []
-    for word in whitelist:
-        if content.lower().find(word.lower()) != -1: 
-            return
-    for word in blacklist:
-        if content.lower().find(word.lower()) != -1:
-            embed = discord.Embed(title="Message deleted", description=f"Your message was deleted because it was too toxic. The following reasons were found: **Blacklisted word**", color=discord.Color.red())
-            await message.reply(f"{message.author.mention}", embed=embed, delete_after=15)
-            await message.delete()
-            await utils.log_values(title="Message deleted", description=f"**{message.author.mention}**'s message ***[{content}]({message.jump_url})*** in <#{message.channel.id}> was deleted because it was too toxic. The following reasons were found:", color=discord.Color.red(), titles=["Blacklisted word"], values=[f"The word **||{word}||** is blacklisted"], channel=channel)
-            return
+    try: 
+        with open(f"./data/words/{message.guild.id}.json", "r") as f:
+            try:
+                data3 = json.load(f)
+                try: whitelist = data3["whitelist"]
+                except: whitelist = []
+                try: blacklist = data3["blacklist"]
+                except: blacklist = []
+            except:
+                whitelist = []
+                blacklist = []
+        for word in whitelist:
+            if content.lower().find(word.lower()) != -1: 
+                return
+        for word in blacklist:
+            if content.lower().find(word.lower()) != -1:
+                embed = discord.Embed(title="Message deleted", description=f"Your message was deleted because it was too toxic. The following reasons were found: **Blacklisted word**", color=discord.Color.red())
+                await message.reply(f"{message.author.mention}", embed=embed, delete_after=15)
+                await message.delete()
+                await utils.log_values(title="Message deleted", description=f"**{message.author.mention}**'s message ***[{content}]({message.jump_url})*** in <#{message.channel.id}> was deleted because it was too toxic. The following reasons were found:", color=discord.Color.red(), titles=["Blacklisted word"], values=[f"The word **||{word}||** is blacklisted"], channel=channel)
+                return
+    except: pass
     message_toxicity = tox.get_toxicity(content)
     reasons_to_suspicous = []
     reasons_to_delete = []
