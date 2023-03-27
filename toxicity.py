@@ -1,7 +1,10 @@
 from googleapiclient import discovery
+# Import perspective_api_key from the config.py file
 from config import perspective_api_key, toxicity_names, toxicity_definitions
+# Import the re module to use regular expressions
 import re
 
+# Create an instance of the API client
 client = discovery.build("commentanalyzer",
                             "v1alpha1",
                             developerKey=perspective_api_key,
@@ -10,20 +13,16 @@ client = discovery.build("commentanalyzer",
                         )
 
 analyze_request = {
-    'comment': {'text': ''},  # The text to analyze
-    #we will ask the following attributes to google: TOXICITY, SEVERE_TOXICITY, IDENTITY_ATTACK, INSULT, PRPFANITY, THREAT, SEXUALLY_EXPLICIT, FLIRTATION, OBSCENE, SPAM
+    'comment': {'text': ''},
     'requestedAttributes': {'TOXICITY': {}, 'SEVERE_TOXICITY': {}, 'IDENTITY_ATTACK': {}, 'INSULT': {}, 'PROFANITY': {}, 'THREAT': {}, 'SEXUALLY_EXPLICIT': {}, 'FLIRTATION': {}, 'OBSCENE': {}, 'SPAM': {}},
-    #we will analyze the text in any language automatically detected by google
     'languages': [],
-    'doNotStore': 'true'  # We don't want google to store the data because of privacy reasons & the GDPR (General Data Protection Regulation, an EU law that protects the privacy of EU citizens and residents for data privacy and security purposes https://gdpr-info.eu/)
+    'doNotStore': 'true' 
 }
 analyze_request_not_en = {
-    'comment': {'text': ''},  # The text to analyze
-    #we will ask the following attributes to google: TOXICITY, SEVERE_TOXICITY, IDENTITY_ATTACK, INSULT, PRPFANITY, THREAT, SEXUALLY_EXPLICIT, FLIRTATION, OBSCENE, SPAM
+    'comment': {'text': ''}, 
     'requestedAttributes': {'TOXICITY': {}, 'SEVERE_TOXICITY': {}, 'IDENTITY_ATTACK': {}, 'INSULT': {}, 'PROFANITY': {}, 'THREAT': {}},
-    #we will analyze the text in any language automatically detected by google
     'languages': [],
-    'doNotStore': 'true'  # We don't want google to store the data because of privacy reasons & the GDPR (General Data Protection Regulation, an EU law that protects the privacy of EU citizens and residents for data privacy and security purposes https://gdpr-info.eu/)
+    'doNotStore': 'true'  
 } 
 def get_toxicity(message: str):
     #we first remove all kind of markdown from the message to avoid exploits
