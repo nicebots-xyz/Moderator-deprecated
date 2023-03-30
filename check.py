@@ -1,5 +1,4 @@
 from config import c
-import re
 import json
 import discord
 import toxicity as tox
