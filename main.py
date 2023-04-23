@@ -220,7 +220,7 @@ async def list_words(ctx: discord.ApplicationContext, whitelist_or_blacklist: st
                 if len(field_name) > 256: 
                     field_name = field_name[:252] + "..."
                     value = whitelist[i-1]
-                exec(f"embed{number}.add_field(name=\"{whitelist[i-1]}\", value=\"{value}\", inline=False)")
+                exec(f"embed{number}.add_field(name=\"{field_name}\", value=\"{value}\", inline=False)")
             #now we remove the words from the whitelist
             for i in range(length):
                 whitelist.remove(whitelist[0])
@@ -229,6 +229,8 @@ async def list_words(ctx: discord.ApplicationContext, whitelist_or_blacklist: st
             number += 1
         paginator = Paginator(pages=my_pages)
         await paginator.respond(interaction=interaction, ephemeral=True)
+    elif len(whitelist) == 0 and whitelist_or_blacklist == "whitelist":
+        return await ctx.respond("The whitelist is empty, please add a word to the whitelist first", ephemeral=True)
     if len(blacklist) !=0 and whitelist_or_blacklist == "blacklist":
         number = 1
         while len(blacklist) != 0:
@@ -239,7 +241,12 @@ async def list_words(ctx: discord.ApplicationContext, whitelist_or_blacklist: st
             exec(f"embed{number} = discord.Embed(title=f\"Blacklist - Page {number}\", description=\"\", color=0x00ff00)")
             #we add the words to the embed
             for i in range(length):
-                exec(f"embed{number}.add_field(name=\"{blacklist[i-1]}\", value=\"\", inline=False)")
+                field_name = blacklist[i-1]
+                value = ""
+                if len(field_name) > 256:
+                    field_name = field_name[:252] + "..."
+                    value = blacklist[i-1]
+                exec(f"embed{number}.add_field(name=\"{field_name}\", value=\"{value}\", inline=False)")
             #now we remove the words from the blacklist
             for i in range(length):
                 blacklist.remove(blacklist[0])
@@ -248,7 +255,8 @@ async def list_words(ctx: discord.ApplicationContext, whitelist_or_blacklist: st
             number += 1
         paginator = Paginator(pages=my_pages)
         await paginator.respond(interaction=interaction, ephemeral=True)
-
+    elif len(blacklist) == 0 and whitelist_or_blacklist == "blacklist":
+        return await ctx.respond("The blacklist is empty, please add a word to the blacklist first", ephemeral=True)
 
 
 ####################### EVENTS #######################
