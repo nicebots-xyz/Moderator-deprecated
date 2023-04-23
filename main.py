@@ -215,7 +215,12 @@ async def list_words(ctx: discord.ApplicationContext, whitelist_or_blacklist: st
             exec(f"embed{number} = discord.Embed(title=f\"Whitelist - Page {number}\", description=\"\", color=0x00ff00)")
             #we add the words to the embed
             for i in range(length):
-                exec(f"embed{number}.add_field(name=\"{whitelist[i-1]}\", value=\"\", inline=False)")
+                field_name = whitelist[i-1]
+                value = ""
+                if len(field_name) > 256: 
+                    field_name = field_name[:252] + "..."
+                    value = whitelist[i-1]
+                exec(f"embed{number}.add_field(name=\"{whitelist[i-1]}\", value=\"{value}\", inline=False)")
             #now we remove the words from the whitelist
             for i in range(length):
                 whitelist.remove(whitelist[0])
