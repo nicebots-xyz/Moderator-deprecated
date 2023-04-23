@@ -29,16 +29,16 @@ async def setthreshold(ctx: discord.ApplicationContext, toxicity: float = None, 
     except: data = None
     if data is None:
         #first we check if any of the values is none. If it's none, we set it to 0.40
-        if toxicity is None: toxicity = 0.40
-        if severe_toxicity is None: severe_toxicity = 0.40
-        if identity_attack is None: identity_attack = 0.40
-        if insult is None: insult = 0.40
-        if profanity is None: profanity = 0.40
-        if threat is None: threat = 0.40
-        if sexually_explicit is None: sexually_explicit = 0.40
-        if flirtation is None: flirtation = 0.40
-        if obscene is None: obscene = 0.40
-        if spam is None: spam = 0.40
+        if toxicity is None: toxicity = 0.70
+        if severe_toxicity is None: severe_toxicity = 0.50
+        if identity_attack is None: identity_attack = 0.60
+        if insult is None: insult = 0.80
+        if profanity is None: profanity = 0.70
+        if threat is None: threat = 0.80
+        if sexually_explicit is None: sexually_explicit = 0.80
+        if flirtation is None: flirtation = 0.90
+        if obscene is None: obscene = 0.80
+        if spam is None: spam = 0.80
         c.execute("INSERT INTO moderation VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (str(ctx.guild.id), toxicity, severe_toxicity, identity_attack, insult, profanity, threat, sexually_explicit, flirtation, obscene, spam))
         conn.commit()
         embed = discord.Embed(title="Settings successfully set", description="The settings have been successfully set. You can get a list of definitions for the toxicity types with the `/help` command", color=discord.Color.og_blurple()) #og_blurple is the discord blurple color, why? because it's cool and it's the color of discord a lot of people like it
