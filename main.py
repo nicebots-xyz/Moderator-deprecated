@@ -262,8 +262,13 @@ async def list_words(ctx: discord.ApplicationContext, whitelist_or_blacklist: st
 ####################### EVENTS #######################
 @bot.event
 async def on_message( message: discord.Message):
-    if message.author == bot.user: return #if the message is sent by the bot, we don't want to moderate it, we don't want to moderate the bot,
+    if message.author == bot.user: return
     await check.validate(message)
+
+@bot.event
+async def on_message_edit(before: discord.Message, after: discord.Message):
+    if after.author == bot.user: return
+    await check.validate(after)
 
 @bot.event
 #when the bot is added to a new server, we want to send a message to the user who added the bot to the server
