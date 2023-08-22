@@ -11,7 +11,7 @@ This is the simplest option - simply invite the bot to your Discord server by cl
 To run the bot using Docker, use the following command:
 
 ```bash
-docker run -e DISCORD_TOKEN=<your_discord_token> -e PERSPECTIVE_API_KEY=<your_perspective_api_key> -d /path/to/your/data:/Moderator/data paillat/moderator:latest
+docker run -e DISCORD_TOKEN=<your_discord_token> -e PERSPECTIVE_API_KEY=<your_perspective_api_key> -d /path/to/your/data:/Moderator/data ghcr.io/paillat-dev/moderator:latest
 ```
 
 ### 3. Clone and Run on Your Machine  
@@ -48,7 +48,7 @@ This command allows you to set the threshold for each type of toxicity. The opti
 - obscene
 - spam
 
-To use the `/setthreshold` command, you must have administrator permissions. If a value is not specified, the default threshold will be set to 0.40. You can view the current settings for your server by using the `/setthreshold` command without any options. **You will need to run this command at least once when adding the bot to your server for the firs time**.
+To use the `/setthreshold` command, you must have administrator permissions. If a value is not specified, the default threshold will be set to the best avlues I found. You can view the current settings for your server by using the `/setthreshold` command without any options. **You will need to run this command at least once when adding the bot to your server for the firs time**.
 
 ### /setup
 
