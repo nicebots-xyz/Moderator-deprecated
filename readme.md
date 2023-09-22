@@ -11,7 +11,7 @@ This is the simplest option - simply invite the bot to your Discord server by cl
 To run the bot using Docker, use the following command:
 
 ```bash
-docker run -e DISCORD_TOKEN=<your_discord_token> -e PERSPECTIVE_API_KEY=<your_perspective_api_key> -d /path/to/your/data:/Moderator/data ghcr.io/paillat-dev/moderator:latest
+docker run -e DISCORD_TOKEN=<your_discord_token> -e PERSPECTIVE_API_KEY=<your_perspective_api_key> -d /path/to/your/data:/Moderator/data ghcr.io/nicebots-xyz/moderator:latest
 ```
 
 ### 3. Clone and Run on Your Machine  
