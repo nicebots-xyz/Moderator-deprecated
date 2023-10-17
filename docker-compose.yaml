@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  moderator:
+    container_name: Moderator
+    build: .
+    env_file:
+      - .env
+    restart: always
+    volumes:
+      - ./data:/Moderator/data
