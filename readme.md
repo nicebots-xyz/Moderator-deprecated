@@ -1,3 +1,6 @@
+# ⚠️Important notice
+## This repository is now deprectated, and will be replaced soon by a new version. Stay tuned 👀.
+
 # Moderator Bot
 A Discord bot that uses Google's Perspective API to moderate chat.
 
