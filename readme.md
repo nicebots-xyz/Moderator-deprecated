@@ -1,5 +1,5 @@
 # ⚠️Important notice
-## This repository is now deprectated, and will be replaced soon by a new version. Stay tuned 👀.
+## This repository is now deprectated. If you are looking into something similar, try ChatCop. Lear nore about it [here](https://nicebots.xyz/featured-bots/ChatCop).
 
 # Moderator Bot
 A Discord bot that uses Google's Perspective API to moderate chat.
